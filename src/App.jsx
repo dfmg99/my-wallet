@@ -32,7 +32,7 @@ function AppInner() {
       <BottomNav currentPage={page} onNavigate={setPage} onLogout={logout} />
 
       <div className="app-main">
-        <AppHeader onQuickOpen={setQuickType} />
+        <AppHeader onQuickOpen={setQuickType} onNavigate={setPage} />
         <div className="app-content">
           {page === 'overview'      && <Overview />}
           {page === 'transactions'  && <Transactions />}
