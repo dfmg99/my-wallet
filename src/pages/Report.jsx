@@ -698,11 +698,11 @@ export default function Report() {
                           <span style={{ marginLeft: 6, fontSize: 11, color: 'var(--muted)' }}>{isOpen ? '▲' : '▼'}</span>
                         </div>
                       </td>
-                      <td style={{ textAlign: 'right', fontWeight: 700, color: 'var(--green)', whiteSpace: 'nowrap' }}>{fmt(cat.amount)}</td>
+                      <td style={{ textAlign: 'right', fontWeight: 700, color: 'var(--green)', whiteSpace: 'nowrap', paddingRight: 12 }}>{fmt(cat.amount)}</td>
                       <td style={{ paddingLeft: 12 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                          <div style={{ flex: 1, height: 3, background: 'var(--border)', borderRadius: 2, overflow: 'hidden' }}>
-                            <div style={{ height: '100%', width: `${cat.pct}%`, background: cat.color, borderRadius: 2 }} />
+                          <div style={{ flex: 1, height: 6, background: 'var(--border)', borderRadius: 3, overflow: 'hidden' }}>
+                            <div style={{ height: '100%', width: `${cat.pct}%`, background: cat.color, borderRadius: 3 }} />
                           </div>
                           <span style={{ fontSize: 11, fontWeight: 700, color: cat.color, flexShrink: 0, minWidth: 30, textAlign: 'right' }}>
                             {cat.pct}%
@@ -745,8 +745,8 @@ export default function Report() {
             <thead>
               <tr>
                 <th>Categoría</th>
-                <th style={{ textAlign: 'right' }}>Monto</th>
-                <th>Proporción</th>
+                <th style={{ textAlign: 'right', paddingRight: 12 }}>Monto</th>
+                <th style={{ paddingLeft: 12 }}>Proporción</th>
               </tr>
             </thead>
             <tbody>
@@ -767,8 +767,8 @@ export default function Report() {
                           <span style={{ marginLeft: 6, fontSize: 11, color: 'var(--muted)' }}>{isOpen ? '▲' : '▼'}</span>
                         </div>
                       </td>
-                      <td style={{ textAlign: 'right', fontWeight: 700, color: 'var(--red)', whiteSpace: 'nowrap' }}>{fmt(cat.spent)}</td>
-                      <td>
+                      <td style={{ textAlign: 'right', fontWeight: 700, color: 'var(--red)', whiteSpace: 'nowrap', paddingRight: 12 }}>{fmt(cat.spent)}</td>
+                      <td style={{ paddingLeft: 12 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                           <div style={{ flex: 1, height: 6, background: 'var(--border)', borderRadius: 3, overflow: 'hidden' }}>
                             <div style={{ height: '100%', width: `${cat.pct}%`, background: cat.color, borderRadius: 3 }} />
