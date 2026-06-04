@@ -749,9 +749,9 @@ export default function Report() {
             <span style={{ minWidth: 90, textAlign: 'right' }}>{label}</span>
             <span style={{ minWidth: 80, textAlign: 'right', marginLeft: 12 }}>vs {prevLabel}</span>
           </div>
-          <SummaryRow label="💚 Ingresos"   current={income}  previous={prevIncome}  invertColor={false} />
-          <SummaryRow label="🔴 Gastos"     current={expense} previous={prevExpense} invertColor={true} />
-          <SummaryRow label="✅ Disponible" current={balance} previous={prevBalance} invertColor={false} />
+          <SummaryRow label="Ingresos"   current={income}  previous={prevIncome}  invertColor={false} />
+          <SummaryRow label="Gastos"     current={expense} previous={prevExpense} invertColor={true} />
+          <SummaryRow label="Disponible" current={balance} previous={prevBalance} invertColor={false} />
         </div>
         {prevTxs.length === 0 && (
           <p style={{ fontSize: 11, color: 'var(--muted)', marginTop: 8 }}>
