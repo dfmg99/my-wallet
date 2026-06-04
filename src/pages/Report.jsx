@@ -152,16 +152,29 @@ function FullReport({ onClose, data }) {
                       </span>
                     )}
                   </div>
-                  {/* Line 2: monto left · % + bar right */}
+                  {/* Line 2: monto left · barra con % integrado */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                     <span className="rpt-red" style={{ fontSize: 14, fontWeight: 700, flexShrink: 0 }}>{fmt(c.spent)}</span>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 3 }}>
-                        <span style={{ fontSize: 11, fontWeight: 700, color: c.color || '#f45b7a' }}>{c.pct}%</span>
+                    <div style={{ flex: 1, minWidth: 0, position: 'relative' }}>
+                      <div className="rpt-bar" style={{ height: 14, background: '#eee', borderRadius: 7, overflow: 'hidden' }}>
+                        <div className="rpt-bar-fill" style={{ height: '100%', width: `${c.pct}%`, background: c.color || '#f45b7a', borderRadius: 7 }} />
                       </div>
-                      <div className="rpt-bar" style={{ height: 5, background: '#eee', borderRadius: 3 }}>
-                        <div className="rpt-bar-fill" style={{ height: '100%', width: `${c.pct}%`, background: c.color || '#f45b7a', borderRadius: 3 }} />
-                      </div>
+                      <span style={{
+                        position: 'absolute',
+                        top: '50%',
+                        left: `${c.pct}%`,
+                        transform: c.pct > 15
+                          ? 'translate(calc(-100% - 5px), -50%)'
+                          : 'translate(5px, -50%)',
+                        fontSize: 10,
+                        fontWeight: 700,
+                        lineHeight: 1,
+                        color: c.pct > 15 ? '#fff' : (c.color || '#f45b7a'),
+                        whiteSpace: 'nowrap',
+                        pointerEvents: 'none',
+                      }}>
+                        {c.pct}%
+                      </span>
                     </div>
                   </div>
                 </div>
