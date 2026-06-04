@@ -170,17 +170,21 @@ export default function Overview() {
   async function handleQuickAdd(e, cat) {
     e.preventDefault();
     const amt = parseFloat(quickAmt);
-    if (!amt || amt <= 0) return;
-    await addTransaction({
-      desc: cat.name,
-      amount: amt,
-      type: chartType,
-      cat: cat.name,
-      date: today(),
-      status: 'done',
-    });
-    setActiveCat(null);
-    setQuickAmt('');
+    if (isNaN(amt) || amt <= 0) return;
+    try {
+      await addTransaction({
+        desc:   cat.name,
+        amount: amt,
+        type:   chartType,
+        cat:    cat.name,
+        date:   today(),
+        status: 'done',
+      });
+      setActiveCat(null);
+      setQuickAmt('');
+    } catch (error) {
+      alert('Error al guardar: ' + (error?.message || 'Intenta de nuevo.'));
+    }
   }
 
   function toggleCat(id) {

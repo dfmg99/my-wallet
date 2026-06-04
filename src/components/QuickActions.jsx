@@ -20,12 +20,12 @@ export default function QuickActions({ panel, onClose, onOpenFull }) {
   const [amount, setAmount] = useState('');
   const [cat, setCat]       = useState('');
   const [date, setDate]     = useState(today());
+  const [err, setErr]       = useState('');
 
   // Reset form whenever the panel opens, filtering categories by type
   useEffect(() => {
     if (panel) {
-      setDesc('');
-      setAmount('');
+      setDesc(''); setAmount(''); setErr('');
       const relevant = categories.filter(c => panel === 'income' ? c.type === 'income' : c.type !== 'income');
       setCat(relevant[0]?.name || '');
       setDate(today());
@@ -35,16 +35,29 @@ export default function QuickActions({ panel, onClose, onOpenFull }) {
   async function submit(e) {
     e.preventDefault();
     const a = parseFloat(amount);
-    if (!a || a <= 0) return;
-    await addTransaction({
-      desc: desc.trim() || (panel === 'income' ? 'Ingreso' : 'Gasto'),
-      amount: a,
-      type: panel,
-      cat: cat || categories[0]?.name || 'Otros',
-      date: date || today(),
-      status: 'done',
-    });
-    onClose();
+    if (isNaN(a) || a <= 0) {
+      setErr('Ingresa un monto válido mayor que 0.');
+      return;
+    }
+    const selectedCat = cat || categories[0]?.name;
+    if (!selectedCat) {
+      setErr('No hay categorías disponibles. Crea una primero.');
+      return;
+    }
+    setErr('');
+    try {
+      await addTransaction({
+        desc:   desc.trim() || (panel === 'income' ? 'Ingreso' : 'Gasto'),
+        amount: a,
+        type:   panel,
+        cat:    selectedCat,
+        date:   date || today(),
+        status: 'done',
+      });
+      onClose();
+    } catch (error) {
+      setErr('Error al guardar: ' + (error?.message || 'Intenta de nuevo.'));
+    }
   }
 
   if (!panel) return null;
@@ -108,6 +121,11 @@ export default function QuickActions({ panel, onClose, onOpenFull }) {
               onBlur={e => e.target.style.borderColor = 'var(--border)'}
             />
           </div>
+          {err && (
+            <div style={{ fontSize: 12, color: 'var(--red)', background: 'var(--red)18', border: '1px solid var(--red)44', borderRadius: 8, padding: '7px 10px' }}>
+              {err}
+            </div>
+          )}
           <button
             type="submit"
             style={{
