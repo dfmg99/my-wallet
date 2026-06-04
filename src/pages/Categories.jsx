@@ -139,7 +139,7 @@ export default function Categories() {
           {incomeCategories.length > 0 && (
             <div style={{ marginBottom: 24 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-                <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--green)', textTransform: 'uppercase', letterSpacing: '0.6px' }}>💚 Ingresos</span>
+                <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--green)', textTransform: 'uppercase', letterSpacing: '0.6px' }}>Ingresos</span>
                 <div style={{ flex: 1, height: 1, background: 'var(--green)33' }} />
               </div>
               <div className="cat-grid">
@@ -155,7 +155,7 @@ export default function Categories() {
           {expenseCategories.length > 0 && (
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-                <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--red)', textTransform: 'uppercase', letterSpacing: '0.6px' }}>🔴 Gastos</span>
+                <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--red)', textTransform: 'uppercase', letterSpacing: '0.6px' }}>Gastos</span>
                 <div style={{ flex: 1, height: 1, background: 'var(--red)33' }} />
               </div>
               <div className="cat-grid">

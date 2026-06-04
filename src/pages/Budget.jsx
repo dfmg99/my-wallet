@@ -48,50 +48,57 @@ function BudgetEditModal({ cat, currentBudget, onSave, onClose }) {
 
 // ── Budgeted category row ──────────────────────────────
 function BudgetedRow({ cat, spent, onEdit }) {
-  const budget  = cat.budget || 0;
-  const pct     = Math.min((spent / budget) * 100, 100);
-  const rawPct  = (spent / budget) * 100;
-  const color   = barColor(rawPct);
-  const over    = spent > budget ? spent - budget : 0;
+  const budget = cat.budget || 0;
+  const pct    = Math.min((spent / budget) * 100, 100);
+  const rawPct = (spent / budget) * 100;
+  const color  = barColor(rawPct);
+  const over   = spent > budget ? spent - budget : 0;
 
   return (
     <div style={{ padding: '14px 0', borderBottom: '1px solid var(--border)44' }}>
-      {/* Top row: icon + name + % + edit button */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+
+      {/* Row 1: icon + name + % + pencil */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
         <div style={{
-          width: 38, height: 38, borderRadius: '50%', flexShrink: 0,
-          background: `${cat.color}22`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18,
+          width: 36, height: 36, borderRadius: '50%', flexShrink: 0,
+          background: `${cat.color}22`, display: 'flex', alignItems: 'center',
+          justifyContent: 'center', fontSize: 17,
         }}>
           {cat.icon}
         </div>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <span style={{ fontSize: 14, fontWeight: 500 }}>{cat.name}</span>
-            <span style={{ fontSize: 12, fontWeight: 700, color }}>{Math.round(rawPct)}%</span>
-          </div>
-        </div>
-        <span style={{ fontSize: 12, fontWeight: 600, color: over > 0 ? 'var(--red)' : 'var(--green)', flexShrink: 0 }}>
-          {over > 0 ? `Excedido: ${fmt(over)}` : `Disponible: ${fmt(budget - spent)}`}
+        <span style={{ fontSize: 14, fontWeight: 600, flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          {cat.name}
+        </span>
+        <span style={{ fontSize: 12, fontWeight: 700, color, flexShrink: 0 }}>
+          {Math.round(rawPct)}%
         </span>
         <button
           onClick={onEdit}
-          style={{ background: 'none', border: 'none', color: 'var(--muted)', cursor: 'pointer', fontSize: 13, padding: '2px 6px', borderRadius: 6, flexShrink: 0 }}
+          style={{ background: 'none', border: 'none', color: 'var(--muted)', cursor: 'pointer', fontSize: 14, padding: '4px 6px', borderRadius: 6, flexShrink: 0, lineHeight: 1 }}
           title="Editar presupuesto"
         >
           ✏️
         </button>
       </div>
 
-      {/* Progress bar */}
+      {/* Row 2: Disponible / Excedido alineado a la derecha */}
+      <div style={{ textAlign: 'right', marginBottom: 6, paddingLeft: 46 }}>
+        <span style={{ fontSize: 12, fontWeight: 700, color: over > 0 ? 'var(--red)' : 'var(--green)' }}>
+          {over > 0 ? `Excedido: ${fmt(over)}` : `Disponible: ${fmt(budget - spent)}`}
+        </span>
+      </div>
+
+      {/* Row 3: progress bar full width */}
       <div style={{ height: 7, background: 'var(--border)', borderRadius: 4, overflow: 'hidden', marginBottom: 6 }}>
         <div style={{ height: '100%', width: `${pct}%`, background: color, borderRadius: 4, transition: 'width 0.4s ease, background-color 0.3s ease' }} />
       </div>
 
-      {/* Bottom row: spent (left) | limit (right) */}
+      {/* Row 4: gastado (left) | límite (right) */}
       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-        <span style={{ fontSize: 12, color: color, fontWeight: 600 }}>{fmt(spent)} gastado</span>
-        <span style={{ fontSize: 12, color: 'var(--muted)' }}>límite {fmt(budget)}</span>
+        <span style={{ fontSize: 11, color, fontWeight: 600 }}>{fmt(spent)} gastado</span>
+        <span style={{ fontSize: 11, color: 'var(--muted)' }}>límite {fmt(budget)}</span>
       </div>
+
     </div>
   );
 }
