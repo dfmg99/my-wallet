@@ -136,24 +136,38 @@ function FullReport({ onClose, data }) {
         {/* ── Expense by category ── */}
         <h2 style={h2}>Gastos por Categoría</h2>
         {catBreakdown.length === 0 ? <p style={{ color: '#888', fontSize: 13 }}>Sin gastos registrados.</p> : (
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <thead><tr><th style={th}>Categoría</th><th style={{ ...th, textAlign: 'right' }}>Monto</th><th style={{ ...th, textAlign: 'right' }}>%</th><th style={{ ...th, textAlign: 'right' }}>Presupuesto</th><th style={{ ...th, width: 100 }}>Progreso</th></tr></thead>
-            <tbody>
-              {catBreakdown.map(c => {
-                const budget = categories.find(cat => cat.name === c.name)?.budget || 0;
-                const pctBudget = budget > 0 ? Math.round((c.spent / budget) * 100) : null;
-                return (
-                  <tr key={c.name}>
-                    <td style={cell}><span style={{ marginRight: 8 }}>{c.icon}</span>{c.name}</td>
-                    <td style={{ ...cell, textAlign: 'right', fontWeight: 700 }} className="rpt-red">{fmt(c.spent)}</td>
-                    <td style={{ ...cell, textAlign: 'right', color: '#888' }}>{c.pct}%</td>
-                    <td style={{ ...cell, textAlign: 'right', color: '#888' }}>{budget > 0 ? `${fmt(budget)} (${pctBudget}%)` : '—'}</td>
-                    <td style={cell}><div className="rpt-bar" style={{ height: 5, background: '#eee', borderRadius: 3 }}><div className="rpt-bar-fill" style={{ height: '100%', width: `${c.pct}%`, background: c.color || '#f45b7a', borderRadius: 3 }} /></div></td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+          <div>
+            {catBreakdown.map(c => {
+              const budget    = categories.find(cat => cat.name === c.name)?.budget || 0;
+              const pctBudget = budget > 0 ? Math.round((c.spent / budget) * 100) : null;
+              return (
+                <div key={c.name} style={{ padding: '10px 0', borderBottom: '1px solid #eee' }}>
+                  {/* Line 1: icon + name */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                    <span style={{ fontSize: 18, flexShrink: 0 }}>{c.icon}</span>
+                    <span style={{ fontSize: 14, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.name}</span>
+                    {budget > 0 && (
+                      <span style={{ marginLeft: 'auto', fontSize: 11, color: '#888', flexShrink: 0 }}>
+                        presup. {fmt(budget)}{pctBudget !== null ? ` (${pctBudget}%)` : ''}
+                      </span>
+                    )}
+                  </div>
+                  {/* Line 2: monto left · % + bar right */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <span className="rpt-red" style={{ fontSize: 14, fontWeight: 700, flexShrink: 0 }}>{fmt(c.spent)}</span>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 3 }}>
+                        <span style={{ fontSize: 11, fontWeight: 700, color: c.color || '#f45b7a' }}>{c.pct}%</span>
+                      </div>
+                      <div className="rpt-bar" style={{ height: 5, background: '#eee', borderRadius: 3 }}>
+                        <div className="rpt-bar-fill" style={{ height: '100%', width: `${c.pct}%`, background: c.color || '#f45b7a', borderRadius: 3 }} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         )}
 
         {/* ── Top 5 transactions ── */}
