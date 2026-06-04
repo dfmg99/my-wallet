@@ -128,16 +128,13 @@ export function AppProvider({ children }) {
 
   // ── Auth actions ──────────────────────────────────────
   const register = useCallback(async (name, email, password) => {
-    const { data, error } = await supabase.auth.signUp({ email, password });
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { data: { name } }, // stored in raw_user_meta_data for the DB trigger
+    });
     if (error) throw new Error(error.message);
-    const userId = data.user.id;
-
-    // Create profile
-    await supabase.from('profiles').insert({ id: userId, name });
-
-    // Seed default categories
-    const seeds = DEFAULT_CATEGORIES.map(c => catToDb({ ...c, isDefault: c.isDefault }, userId));
-    await supabase.from('categories').insert(seeds);
+    // Profile + default categories are created automatically by the Supabase DB trigger
   }, []);
 
   const loginWithEmail = useCallback(async (email, password) => {
