@@ -677,9 +677,9 @@ export default function Report() {
           <table>
             <thead>
               <tr>
-                <th>Categoría</th>
-                <th style={{ textAlign: 'right', paddingRight: 12 }}>Monto</th>
+                <th style={{ width: '30%' }}>Categoría</th>
                 <th style={{ paddingLeft: 12 }}>Proporción</th>
+                <th style={{ textAlign: 'right', paddingLeft: 12, whiteSpace: 'nowrap' }}>Monto</th>
               </tr>
             </thead>
             <tbody>
@@ -698,17 +698,20 @@ export default function Report() {
                           <span style={{ marginLeft: 6, fontSize: 11, color: 'var(--muted)' }}>{isOpen ? '▲' : '▼'}</span>
                         </div>
                       </td>
-                      <td style={{ textAlign: 'right', fontWeight: 700, color: 'var(--green)', whiteSpace: 'nowrap', paddingRight: 12 }}>{fmt(cat.amount)}</td>
                       <td style={{ paddingLeft: 12 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                          <div style={{ flex: 1, height: 6, background: 'var(--border)', borderRadius: 3, overflow: 'hidden' }}>
-                            <div style={{ height: '100%', width: `${cat.pct}%`, background: cat.color, borderRadius: 3 }} />
+                        <div style={{ position: 'relative' }}>
+                          <div style={{ height: 14, background: 'var(--border)', borderRadius: 7, overflow: 'hidden' }}>
+                            <div style={{ height: '100%', width: `${cat.pct}%`, background: cat.color, borderRadius: 7 }} />
                           </div>
-                          <span style={{ fontSize: 11, fontWeight: 700, color: cat.color, flexShrink: 0, minWidth: 30, textAlign: 'right' }}>
-                            {cat.pct}%
-                          </span>
+                          <span style={{
+                            position: 'absolute', top: '50%', left: `${cat.pct}%`,
+                            transform: cat.pct > 15 ? 'translate(calc(-100% - 5px), -50%)' : 'translate(5px, -50%)',
+                            fontSize: 10, fontWeight: 700, lineHeight: 1, whiteSpace: 'nowrap', pointerEvents: 'none',
+                            color: cat.pct > 15 ? '#fff' : cat.color,
+                          }}>{cat.pct}%</span>
                         </div>
                       </td>
+                      <td style={{ textAlign: 'right', fontWeight: 700, color: 'var(--green)', whiteSpace: 'nowrap', paddingLeft: 12 }}>{fmt(cat.amount)}</td>
                     </tr>
                     {isOpen && (
                       <tr key={`inc-${cat.name}-txs`}>
@@ -744,9 +747,9 @@ export default function Report() {
           <table>
             <thead>
               <tr>
-                <th>Categoría</th>
-                <th style={{ textAlign: 'right', paddingRight: 12 }}>Monto</th>
+                <th style={{ width: '30%' }}>Categoría</th>
                 <th style={{ paddingLeft: 12 }}>Proporción</th>
+                <th style={{ textAlign: 'right', paddingLeft: 12, whiteSpace: 'nowrap' }}>Monto</th>
               </tr>
             </thead>
             <tbody>
@@ -767,17 +770,20 @@ export default function Report() {
                           <span style={{ marginLeft: 6, fontSize: 11, color: 'var(--muted)' }}>{isOpen ? '▲' : '▼'}</span>
                         </div>
                       </td>
-                      <td style={{ textAlign: 'right', fontWeight: 700, color: 'var(--red)', whiteSpace: 'nowrap', paddingRight: 12 }}>{fmt(cat.spent)}</td>
                       <td style={{ paddingLeft: 12 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                          <div style={{ flex: 1, height: 6, background: 'var(--border)', borderRadius: 3, overflow: 'hidden' }}>
-                            <div style={{ height: '100%', width: `${cat.pct}%`, background: cat.color, borderRadius: 3 }} />
+                        <div style={{ position: 'relative' }}>
+                          <div style={{ height: 14, background: 'var(--border)', borderRadius: 7, overflow: 'hidden' }}>
+                            <div style={{ height: '100%', width: `${cat.pct}%`, background: cat.color, borderRadius: 7 }} />
                           </div>
-                          <span style={{ fontSize: 11, fontWeight: 700, color: cat.color, flexShrink: 0, minWidth: 30, textAlign: 'right' }}>
-                            {cat.pct}%
-                          </span>
+                          <span style={{
+                            position: 'absolute', top: '50%', left: `${cat.pct}%`,
+                            transform: cat.pct > 15 ? 'translate(calc(-100% - 5px), -50%)' : 'translate(5px, -50%)',
+                            fontSize: 10, fontWeight: 700, lineHeight: 1, whiteSpace: 'nowrap', pointerEvents: 'none',
+                            color: cat.pct > 15 ? '#fff' : cat.color,
+                          }}>{cat.pct}%</span>
                         </div>
                       </td>
+                      <td style={{ textAlign: 'right', fontWeight: 700, color: 'var(--red)', whiteSpace: 'nowrap', paddingLeft: 12 }}>{fmt(cat.spent)}</td>
                     </tr>
                     {isOpen && (
                       <tr key={`${cat.name}-txs`}>
