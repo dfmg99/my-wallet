@@ -679,28 +679,57 @@ export default function Report() {
               <tr>
                 <th>Categoría</th>
                 <th style={{ textAlign: 'right' }}>Monto</th>
-                <th style={{ textAlign: 'right' }}>%</th>
-                <th style={{ width: 120 }}>Proporción</th>
+                <th>Proporción</th>
               </tr>
             </thead>
             <tbody>
-              {incomeBreakdown.map(cat => (
-                <tr key={cat.name}>
-                  <td>
-                    <div className="tx-row">
-                      <div className="tx-icon" style={{ background: `${cat.color}22`, fontSize: 16, marginRight: 10 }}>{cat.icon}</div>
-                      <span className="tx-name">{cat.name}</span>
-                    </div>
-                  </td>
-                  <td style={{ textAlign: 'right', fontWeight: 700, color: 'var(--green)' }}>{fmt(cat.amount)}</td>
-                  <td style={{ textAlign: 'right', fontSize: 12, color: 'var(--muted)' }}>{cat.pct}%</td>
-                  <td>
-                    <div style={{ height: 6, background: 'var(--border)', borderRadius: 3, overflow: 'hidden' }}>
-                      <div style={{ height: '100%', width: `${cat.pct}%`, background: cat.color, borderRadius: 3 }} />
-                    </div>
-                  </td>
-                </tr>
-              ))}
+              {incomeBreakdown.map(cat => {
+                const isOpen = openCats.has(`inc-${cat.name}`);
+                const catTxs = periodTxs
+                  .filter(t => t.type === 'income' && t.cat === cat.name)
+                  .sort((a, b) => b.date.localeCompare(a.date));
+                return (
+                  <>
+                    <tr key={cat.name} style={{ cursor: 'pointer' }} onClick={() => toggleReportCat(`inc-${cat.name}`)}>
+                      <td>
+                        <div className="tx-row">
+                          <div className="tx-icon" style={{ background: `${cat.color}22`, fontSize: 16, marginRight: 10 }}>{cat.icon}</div>
+                          <span className="tx-name">{cat.name}</span>
+                          <span style={{ marginLeft: 6, fontSize: 11, color: 'var(--muted)' }}>{isOpen ? '▲' : '▼'}</span>
+                        </div>
+                      </td>
+                      <td style={{ textAlign: 'right', fontWeight: 700, color: 'var(--green)', whiteSpace: 'nowrap' }}>{fmt(cat.amount)}</td>
+                      <td>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                          <div style={{ flex: 1, height: 6, background: 'var(--border)', borderRadius: 3, overflow: 'hidden' }}>
+                            <div style={{ height: '100%', width: `${cat.pct}%`, background: cat.color, borderRadius: 3 }} />
+                          </div>
+                          <span style={{ fontSize: 11, fontWeight: 700, color: cat.color, flexShrink: 0, minWidth: 30, textAlign: 'right' }}>
+                            {cat.pct}%
+                          </span>
+                        </div>
+                      </td>
+                    </tr>
+                    {isOpen && (
+                      <tr key={`inc-${cat.name}-txs`}>
+                        <td colSpan={3} style={{ padding: 0 }}>
+                          <div style={{ background: 'var(--surface2)', borderRadius: 8, margin: '4px 0 8px', overflow: 'hidden' }}>
+                            {catTxs.length === 0 ? (
+                              <p style={{ fontSize: 12, color: 'var(--muted)', padding: '8px 14px', margin: 0 }}>Sin transacciones</p>
+                            ) : catTxs.map(t => (
+                              <div key={t.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 14px', borderBottom: '1px solid var(--border)44' }}>
+                                <span style={{ fontSize: 11, color: 'var(--muted)', flexShrink: 0, whiteSpace: 'nowrap' }}>{t.date}</span>
+                                <span style={{ fontSize: 12, flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.desc}</span>
+                                <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--green)', flexShrink: 0, whiteSpace: 'nowrap' }}>+{fmt(t.amount)}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </>
+                );
+              })}
             </tbody>
           </table>
         )}
