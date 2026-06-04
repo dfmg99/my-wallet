@@ -32,6 +32,30 @@ export default function QuickActions({ panel, onClose, onOpenFull }) {
     }
   }, [panel]);
 
+  // Lock body scroll while panel is open.
+  // On mobile: position:fixed prevents the virtual keyboard from resizing the background.
+  // Save & restore scrollY so the page doesn't jump to the top when closing.
+  useEffect(() => {
+    if (!panel) return;
+    const scrollY        = window.scrollY;
+    const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+
+    document.body.style.position    = 'fixed';
+    document.body.style.top         = `-${scrollY}px`;
+    document.body.style.width       = '100%';
+    document.body.style.overflowY   = 'scroll';
+    document.body.style.paddingRight = `${scrollbarWidth}px`;
+
+    return () => {
+      document.body.style.position    = '';
+      document.body.style.top         = '';
+      document.body.style.width       = '';
+      document.body.style.overflowY   = '';
+      document.body.style.paddingRight = '';
+      window.scrollTo(0, scrollY);
+    };
+  }, [panel]);
+
   async function submit(e) {
     e.preventDefault();
     const a = parseFloat(amount);
