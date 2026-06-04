@@ -189,7 +189,7 @@ export function AppProvider({ children }) {
 
   const updateTransaction = useCallback(async (id, changes) => {
     const dbChanges = {};
-    const map = { desc: 'desc', amount: 'amount', type: 'type', cat: 'cat', date: 'date', method: 'method', status: 'status' };
+    const map = { desc: 'description', amount: 'amount', type: 'type', cat: 'cat', date: 'date', method: 'method', status: 'status' };
     Object.keys(changes).forEach(k => { if (map[k]) dbChanges[map[k]] = changes[k]; });
     pendingTx.current.add(id);
     await supabase.from('transactions').update(dbChanges).eq('id', id);

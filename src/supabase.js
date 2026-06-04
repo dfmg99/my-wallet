@@ -11,7 +11,7 @@ export function dbToTx(row) {
   return {
     id:     row.id,
     userId: row.user_id,
-    desc:   row.desc,
+    desc:   row.description,
     amount: Number(row.amount),
     type:   row.type,
     cat:    row.cat,
@@ -24,7 +24,7 @@ export function dbToTx(row) {
 export function txToDb(tx, userId) {
   return {
     user_id: userId,
-    desc:    tx.desc,
+    description: tx.desc,
     amount:  tx.amount,
     type:    tx.type,
     cat:     tx.cat,
