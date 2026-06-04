@@ -64,6 +64,14 @@ function FullReport({ onClose, data }) {
   const todayStr = new Date().toLocaleDateString('es-PA', { day: '2-digit', month: '2-digit', year: 'numeric' });
   const savingsPct = income > 0 ? Math.round((balance / income) * 100) : 0;
   const top5 = [...monthTxs].sort((a, b) => b.amount - a.amount).slice(0, 5);
+  const [expandedCats, setExpandedCats] = useState(new Set());
+  function toggleCat(name) {
+    setExpandedCats(prev => {
+      const next = new Set(prev);
+      next.has(name) ? next.delete(name) : next.add(name);
+      return next;
+    });
+  }
 
   useEffect(() => {
     const style = document.createElement('style');
@@ -140,43 +148,53 @@ function FullReport({ onClose, data }) {
             {catBreakdown.map(c => {
               const budget    = categories.find(cat => cat.name === c.name)?.budget || 0;
               const pctBudget = budget > 0 ? Math.round((c.spent / budget) * 100) : null;
+              const isOpen    = expandedCats.has(c.name);
+              const catTxs    = monthTxs.filter(t => t.type === 'expense' && t.cat === c.name)
+                                        .sort((a, b) => b.date.localeCompare(a.date));
               return (
-                <div key={c.name} style={{ padding: '10px 0', borderBottom: '1px solid #eee' }}>
-                  {/* Line 1: icon + name */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-                    <span style={{ fontSize: 18, flexShrink: 0 }}>{c.icon}</span>
-                    <span style={{ fontSize: 14, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.name}</span>
-                    {budget > 0 && (
-                      <span style={{ marginLeft: 'auto', fontSize: 11, color: '#888', flexShrink: 0 }}>
-                        presup. {fmt(budget)}{pctBudget !== null ? ` (${pctBudget}%)` : ''}
-                      </span>
-                    )}
-                  </div>
-                  {/* Line 2: monto left · barra con % integrado */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <span className="rpt-red" style={{ fontSize: 14, fontWeight: 700, flexShrink: 0 }}>{fmt(c.spent)}</span>
-                    <div style={{ flex: 1, minWidth: 0, position: 'relative' }}>
-                      <div className="rpt-bar" style={{ height: 14, background: '#eee', borderRadius: 7, overflow: 'hidden' }}>
-                        <div className="rpt-bar-fill" style={{ height: '100%', width: `${c.pct}%`, background: c.color || '#f45b7a', borderRadius: 7 }} />
+                <div key={c.name} style={{ borderBottom: '1px solid #eee' }}>
+                  <div style={{ padding: '10px 0' }}>
+                    {/* Line 1: icon + name + expand arrow + budget */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 7 }}>
+                      <span style={{ fontSize: 18, flexShrink: 0 }}>{c.icon}</span>
+                      <span style={{ fontSize: 14, fontWeight: 600, flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.name}</span>
+                      {budget > 0 && (
+                        <span style={{ fontSize: 11, color: '#888', flexShrink: 0 }}>
+                          presup. {fmt(budget)}{pctBudget !== null ? ` (${pctBudget}%)` : ''}
+                        </span>
+                      )}
+                      <button onClick={() => toggleCat(c.name)}
+                        style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 12, color: '#888', padding: '2px 4px', flexShrink: 0 }}
+                        title={isOpen ? 'Ocultar transacciones' : 'Ver transacciones'}>
+                        {isOpen ? '▲' : '▼'}
+                      </button>
+                    </div>
+                    {/* Line 2: monto + barra + % afuera */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                      <span className="rpt-red" style={{ fontSize: 14, fontWeight: 700, flexShrink: 0 }}>{fmt(c.spent)}</span>
+                      <div className="rpt-bar" style={{ flex: 1, height: 8, background: '#eee', borderRadius: 4, overflow: 'hidden' }}>
+                        <div className="rpt-bar-fill" style={{ height: '100%', width: `${c.pct}%`, background: c.color || '#f45b7a', borderRadius: 4 }} />
                       </div>
-                      <span style={{
-                        position: 'absolute',
-                        top: '50%',
-                        left: `${c.pct}%`,
-                        transform: c.pct > 15
-                          ? 'translate(calc(-100% - 5px), -50%)'
-                          : 'translate(5px, -50%)',
-                        fontSize: 10,
-                        fontWeight: 700,
-                        lineHeight: 1,
-                        color: c.pct > 15 ? '#fff' : (c.color || '#f45b7a'),
-                        whiteSpace: 'nowrap',
-                        pointerEvents: 'none',
-                      }}>
+                      <span style={{ fontSize: 11, fontWeight: 700, color: c.color || '#f45b7a', flexShrink: 0, minWidth: 28, textAlign: 'right' }}>
                         {c.pct}%
                       </span>
                     </div>
                   </div>
+
+                  {/* Expandable transactions list */}
+                  {isOpen && (
+                    <div style={{ background: '#fafafa', borderRadius: 6, marginBottom: 8, overflow: 'hidden' }}>
+                      {catTxs.length === 0 ? (
+                        <p style={{ fontSize: 12, color: '#888', padding: '8px 12px', margin: 0 }}>Sin transacciones</p>
+                      ) : catTxs.map(t => (
+                        <div key={t.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '7px 12px', borderBottom: '1px solid #f0f0f0' }}>
+                          <span style={{ fontSize: 11, color: '#888', flexShrink: 0, whiteSpace: 'nowrap' }}>{t.date}</span>
+                          <span style={{ fontSize: 12, flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.desc}</span>
+                          <span className="rpt-red" style={{ fontSize: 12, fontWeight: 700, flexShrink: 0 }}>-{fmt(t.amount)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               );
             })}
@@ -207,6 +225,49 @@ function FullReport({ onClose, data }) {
           </table>
         )}
 
+        {/* ── Budget Summary ── */}
+        {(() => {
+          const budgetedCats = categories.filter(c => (c.budget || 0) > 0);
+          if (budgetedCats.length === 0) return null;
+          const totalBudget  = budgetedCats.reduce((s, c) => s + c.budget, 0);
+          const spendingMap  = {};
+          monthTxs.filter(t => t.type === 'expense').forEach(t => { spendingMap[t.cat] = (spendingMap[t.cat] || 0) + t.amount; });
+          const totalSpent   = budgetedCats.reduce((s, c) => s + (spendingMap[c.name] || 0), 0);
+          const available    = totalBudget - totalSpent;
+          const exceeded     = budgetedCats.filter(c => (spendingMap[c.name] || 0) > c.budget);
+          return (
+            <>
+              <h2 style={h2}>Resumen de Presupuesto</h2>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 16 }}>
+                {[
+                  { label: 'Presupuesto total', value: fmt(totalBudget), color: '#111' },
+                  { label: 'Total gastado',     value: fmt(totalSpent),  color: '#b02030' },
+                  { label: 'Disponible',        value: fmt(available),   color: available >= 0 ? '#0a6640' : '#b02030' },
+                ].map(({ label: l, value, color }) => (
+                  <div key={l} style={{ padding: '12px 14px', border: '1px solid #e0e0e0', borderRadius: 8 }}>
+                    <div style={{ fontSize: 10, color: '#888', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 4 }}>{l}</div>
+                    <div style={{ fontSize: 18, fontWeight: 800, color }}>{value}</div>
+                  </div>
+                ))}
+              </div>
+              {exceeded.length > 0 && (
+                <div style={{ background: '#fff0f0', border: '1px solid #f0c0c0', borderRadius: 8, padding: '10px 14px', marginBottom: 8 }}>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: '#b02030', marginBottom: 6 }}>⚠️ Categorías que superaron su límite:</div>
+                  {exceeded.map(c => {
+                    const spent = spendingMap[c.name] || 0;
+                    return (
+                      <div key={c.name} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, padding: '3px 0' }}>
+                        <span>{c.icon} {c.name}</span>
+                        <span style={{ color: '#b02030', fontWeight: 600 }}>{fmt(spent)} / límite {fmt(c.budget)}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </>
+          );
+        })()}
+
         {/* ── Month comparison ── */}
         <h2 style={h2}>Comparación con {prevLabel}</h2>
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
@@ -221,8 +282,8 @@ function FullReport({ onClose, data }) {
           </thead>
           <tbody>
             {[
-              { label: 'Ingresos', curr: income, prev: prevIncome, inv: false },
-              { label: 'Gastos',   curr: expense, prev: prevExpense, inv: true },
+              { label: 'Ingresos',   curr: income,  prev: prevIncome,  inv: false },
+              { label: 'Gastos',     curr: expense, prev: prevExpense, inv: true },
               { label: 'Disponible', curr: balance, prev: prevIncome - prevExpense, inv: false },
             ].map(({ label: l, curr, prev, inv }) => {
               const diff = curr - prev;
