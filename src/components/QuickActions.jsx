@@ -47,12 +47,19 @@ export default function QuickActions({ panel, onClose, onOpenFull }) {
     document.body.style.paddingRight = `${scrollbarWidth}px`;
 
     return () => {
+      // Blur any focused input so iOS releases the viewport before we restore scroll
+      if (document.activeElement instanceof HTMLElement) {
+        document.activeElement.blur();
+      }
+
       document.body.style.position    = '';
       document.body.style.top         = '';
       document.body.style.width       = '';
       document.body.style.overflowY   = '';
       document.body.style.paddingRight = '';
-      window.scrollTo(0, scrollY);
+
+      // Small delay for iOS to finish releasing the keyboard before restoring scroll
+      setTimeout(() => window.scrollTo(0, scrollY), 100);
     };
   }, [panel]);
 
