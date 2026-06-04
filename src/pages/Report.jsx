@@ -709,8 +709,7 @@ export default function Report() {
               <tr>
                 <th>Categoría</th>
                 <th style={{ textAlign: 'right' }}>Monto</th>
-                <th style={{ textAlign: 'right' }}>%</th>
-                <th style={{ width: 120 }}>Proporción</th>
+                <th>Proporción</th>
               </tr>
             </thead>
             <tbody>
@@ -724,11 +723,15 @@ export default function Report() {
                       <span className="tx-name">{cat.name}</span>
                     </div>
                   </td>
-                  <td style={{ textAlign: 'right', fontWeight: 700, color: 'var(--red)' }}>{fmt(cat.spent)}</td>
-                  <td style={{ textAlign: 'right', fontSize: 12, color: 'var(--muted)' }}>{cat.pct}%</td>
+                  <td style={{ textAlign: 'right', fontWeight: 700, color: 'var(--red)', whiteSpace: 'nowrap' }}>{fmt(cat.spent)}</td>
                   <td>
-                    <div style={{ height: 6, background: 'var(--border)', borderRadius: 3, overflow: 'hidden' }}>
-                      <div style={{ height: '100%', width: `${cat.pct}%`, background: cat.color, borderRadius: 3 }} />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <div style={{ flex: 1, height: 6, background: 'var(--border)', borderRadius: 3, overflow: 'hidden' }}>
+                        <div style={{ height: '100%', width: `${cat.pct}%`, background: cat.color, borderRadius: 3 }} />
+                      </div>
+                      <span style={{ fontSize: 11, fontWeight: 700, color: cat.color, flexShrink: 0, minWidth: 30, textAlign: 'right' }}>
+                        {cat.pct}%
+                      </span>
                     </div>
                   </td>
                 </tr>
