@@ -57,8 +57,8 @@ function BudgetedRow({ cat, spent, onEdit }) {
   return (
     <div style={{ padding: '14px 0', borderBottom: '1px solid var(--border)44' }}>
 
-      {/* Row 1: icon + name + % + pencil */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
+      {/* Línea 1: ícono + nombre + % */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
         <div style={{
           width: 36, height: 36, borderRadius: '50%', flexShrink: 0,
           background: `${cat.color}22`, display: 'flex', alignItems: 'center',
@@ -69,34 +69,36 @@ function BudgetedRow({ cat, spent, onEdit }) {
         <span style={{ fontSize: 14, fontWeight: 600, flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {cat.name}
         </span>
-        <span style={{ fontSize: 12, fontWeight: 700, color, flexShrink: 0 }}>
+        <span style={{ fontSize: 13, fontWeight: 700, color, flexShrink: 0 }}>
           {Math.round(rawPct)}%
         </span>
-        <button
-          onClick={onEdit}
-          style={{ background: 'none', border: 'none', color: 'var(--muted)', cursor: 'pointer', fontSize: 14, padding: '4px 6px', borderRadius: 6, flexShrink: 0, lineHeight: 1 }}
-          title="Editar presupuesto"
-        >
-          ✏️
-        </button>
       </div>
 
-      {/* Row 2: Disponible / Excedido alineado a la derecha */}
-      <div style={{ textAlign: 'right', marginBottom: 6, paddingLeft: 46 }}>
+      {/* Línea 2: barra de progreso full width */}
+      <div style={{ height: 7, background: 'var(--border)', borderRadius: 4, overflow: 'hidden', marginBottom: 7 }}>
+        <div style={{ height: '100%', width: `${pct}%`, background: color, borderRadius: 4, transition: 'width 0.4s ease, background-color 0.3s ease' }} />
+      </div>
+
+      {/* Línea 3: Disponible alineado a la izquierda */}
+      <div style={{ marginBottom: 5 }}>
         <span style={{ fontSize: 12, fontWeight: 700, color: over > 0 ? 'var(--red)' : 'var(--green)' }}>
           {over > 0 ? `Excedido: ${fmt(over)}` : `Disponible: ${fmt(budget - spent)}`}
         </span>
       </div>
 
-      {/* Row 3: progress bar full width */}
-      <div style={{ height: 7, background: 'var(--border)', borderRadius: 4, overflow: 'hidden', marginBottom: 6 }}>
-        <div style={{ height: '100%', width: `${pct}%`, background: color, borderRadius: 4, transition: 'width 0.4s ease, background-color 0.3s ease' }} />
-      </div>
-
-      {/* Row 4: gastado (left) | límite (right) */}
-      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+      {/* Línea 4: gastado (izq) | límite + lápiz (der) */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <span style={{ fontSize: 11, color, fontWeight: 600 }}>{fmt(spent)} gastado</span>
-        <span style={{ fontSize: 11, color: 'var(--muted)' }}>límite {fmt(budget)}</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+          <span style={{ fontSize: 11, color: 'var(--muted)' }}>límite {fmt(budget)}</span>
+          <button
+            onClick={onEdit}
+            style={{ background: 'none', border: 'none', color: 'var(--muted)', cursor: 'pointer', fontSize: 13, padding: '2px 4px', borderRadius: 5, lineHeight: 1 }}
+            title="Editar presupuesto"
+          >
+            ✏️
+          </button>
+        </div>
       </div>
 
     </div>
