@@ -99,8 +99,8 @@ export function AppProvider({ children }) {
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session?.user) {
         const u = session.user;
-        const profile = await supabase.from('profiles').select('name').eq('id', u.id).single();
-        setCurrentUser({ id: u.id, email: u.email, name: profile.data?.name || u.email });
+        const profile = await supabase.from('profiles').select('name, avatar_color, bio').eq('id', u.id).single();
+        setCurrentUser({ id: u.id, email: u.email, name: profile.data?.name || u.email, avatarColor: profile.data?.avatar_color || '#6c63ff', bio: profile.data?.bio || '' });
         await Promise.all([loadTransactions(u.id), loadCategories(u.id)]);
         cleanup = setupRealtime(u.id);
       }
@@ -110,8 +110,8 @@ export function AppProvider({ children }) {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_IN' && session?.user) {
         const u = session.user;
-        const profile = await supabase.from('profiles').select('name').eq('id', u.id).single();
-        setCurrentUser({ id: u.id, email: u.email, name: profile.data?.name || u.email });
+        const profile = await supabase.from('profiles').select('name, avatar_color, bio').eq('id', u.id).single();
+        setCurrentUser({ id: u.id, email: u.email, name: profile.data?.name || u.email, avatarColor: profile.data?.avatar_color || '#6c63ff', bio: profile.data?.bio || '' });
         await Promise.all([loadTransactions(u.id), loadCategories(u.id)]);
         cleanup = setupRealtime(u.id);
       } else if (event === 'SIGNED_OUT') {
@@ -154,10 +154,14 @@ export function AppProvider({ children }) {
       const { error } = await supabase.auth.updateUser({ password: changes.password });
       if (error) throw new Error(error.message);
     }
-    if (changes.name) {
-      await supabase.from('profiles').update({ name: changes.name }).eq('id', currentUser.id);
-      setCurrentUser(prev => ({ ...prev, name: changes.name }));
+    const profileChanges = {};
+    if (changes.name        !== undefined) profileChanges.name         = changes.name;
+    if (changes.avatarColor !== undefined) profileChanges.avatar_color = changes.avatarColor;
+    if (changes.bio         !== undefined) profileChanges.bio          = changes.bio;
+    if (Object.keys(profileChanges).length > 0) {
+      await supabase.from('profiles').update(profileChanges).eq('id', currentUser.id);
     }
+    setCurrentUser(prev => ({ ...prev, ...changes }));
   }, [currentUser]);
 
   const deleteUser = useCallback(async () => {
