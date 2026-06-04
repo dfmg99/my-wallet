@@ -380,9 +380,151 @@ function buildRange(period, customFrom, customTo) {
   }
 }
 
+// ── Budget Report overlay ─────────────────────────────
+function BudgetReport({ onClose, label, periodTxs, categories, currentUser }) {
+  const todayStr = new Date().toLocaleDateString('es-PA', { day: '2-digit', month: '2-digit', year: 'numeric' });
+
+  const spendingMap = {};
+  periodTxs.filter(t => t.type === 'expense').forEach(t => {
+    spendingMap[t.cat] = (spendingMap[t.cat] || 0) + t.amount;
+  });
+
+  const budgeted   = categories.filter(c => (c.budget || 0) > 0).sort((a, b) => a.name.localeCompare(b.name, 'es'));
+  const unbudgeted = categories.filter(c => !(c.budget > 0)).sort((a, b) => a.name.localeCompare(b.name, 'es'));
+
+  const totalBudget = budgeted.reduce((s, c) => s + c.budget, 0);
+  const totalSpent  = budgeted.reduce((s, c) => s + (spendingMap[c.name] || 0), 0);
+  const available   = totalBudget - totalSpent;
+  const totalPct    = totalBudget > 0 ? Math.min((totalSpent / totalBudget) * 100, 100) : 0;
+  const rawTotalPct = totalBudget > 0 ? (totalSpent / totalBudget) * 100 : 0;
+
+  const budgetBarColor = rawTotalPct >= 100 ? '#b02030' : rawTotalPct >= 80 ? '#b8960a' : '#0a6640';
+
+  const h2 = { fontSize: 13, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', color: '#666', borderBottom: '2px solid #e0e0e0', paddingBottom: 6, marginBottom: 12, marginTop: 24 };
+  const initials = currentUser?.name?.slice(0, 2).toUpperCase() || '??';
+
+  const content = (
+    <div className="rpt-portal" style={{ position: 'fixed', inset: 0, background: 'white', overflowY: 'auto', zIndex: 300, fontFamily: "'Segoe UI', system-ui, sans-serif" }}>
+      {/* Controls */}
+      <div className="rpt-controls" style={{ position: 'sticky', top: 0, background: '#f5f5f5', borderBottom: '1px solid #ddd', padding: '10px 20px', display: 'flex', gap: 10, justifyContent: 'flex-end', alignItems: 'center' }}>
+        <span style={{ marginRight: 'auto', fontSize: 14, fontWeight: 600, color: '#333' }}>Reporte de Presupuesto — {label}</span>
+        <button onClick={() => window.print()} style={{ padding: '8px 16px', background: '#333', color: 'white', border: 'none', borderRadius: 8, cursor: 'pointer', fontSize: 13, fontWeight: 600 }}>🖨️ Imprimir / PDF</button>
+        <button onClick={onClose} style={{ padding: '8px 14px', background: '#e0e0e0', color: '#333', border: 'none', borderRadius: 8, cursor: 'pointer', fontSize: 13 }}>✕ Cerrar</button>
+      </div>
+
+      <div className="rpt-page" style={{ maxWidth: 760, margin: '0 auto', padding: '40px 40px 60px', color: '#111' }}>
+        {/* Header */}
+        <div style={{ textAlign: 'center', marginBottom: 32, borderBottom: '3px solid #111', paddingBottom: 20 }}>
+          <div style={{ fontSize: 24, fontWeight: 800, letterSpacing: '-1px', marginBottom: 4 }}>MY WALLET</div>
+          <div style={{ fontSize: 18, fontWeight: 700, marginBottom: 8 }}>Reporte de Presupuesto — {label}</div>
+          <div style={{ fontSize: 13, color: '#555', display: 'flex', justifyContent: 'center', gap: 24, flexWrap: 'wrap' }}>
+            <span>Usuario: <strong>{currentUser?.name}</strong></span>
+            <span>Generado: <strong>{todayStr}</strong></span>
+          </div>
+        </div>
+
+        {/* 1. Resumen general */}
+        <h2 style={h2}>Resumen General</h2>
+        {totalBudget === 0 ? (
+          <p style={{ color: '#888', fontSize: 13 }}>No hay presupuestos configurados. Asigna límites en la sección Presupuesto.</p>
+        ) : (
+          <>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12, marginBottom: 16 }}>
+              {[
+                { label: 'Presupuesto total',  value: fmt(totalBudget), color: '#111' },
+                { label: 'Total gastado',       value: fmt(totalSpent),  color: '#b02030' },
+                { label: 'Disponible restante', value: fmt(available),   color: available >= 0 ? '#0a6640' : '#b02030' },
+                { label: '% utilizado',         value: `${Math.round(rawTotalPct)}%`, color: budgetBarColor },
+              ].map(({ label: l, value, color }) => (
+                <div key={l} style={{ padding: '14px 16px', border: '1px solid #e0e0e0', borderRadius: 10 }}>
+                  <div style={{ fontSize: 10, color: '#888', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 4 }}>{l}</div>
+                  <div style={{ fontSize: 22, fontWeight: 800, color }}>{value}</div>
+                </div>
+              ))}
+            </div>
+            <div style={{ height: 12, background: '#eee', borderRadius: 6, overflow: 'hidden', marginBottom: 6 }}>
+              <div style={{ height: '100%', width: `${totalPct}%`, background: budgetBarColor, borderRadius: 6, transition: 'width 0.4s' }} />
+            </div>
+            {rawTotalPct >= 100 && (
+              <p style={{ fontSize: 12, color: '#b02030', fontWeight: 600 }}>⚠️ Has superado el presupuesto total del período.</p>
+            )}
+          </>
+        )}
+
+        {/* 2. Detalle por categoría */}
+        {budgeted.length > 0 && (
+          <>
+            <h2 style={h2}>Detalle por Categoría</h2>
+            <div>
+              {budgeted.map(c => {
+                const spent     = spendingMap[c.name] || 0;
+                const avail     = c.budget - spent;
+                const rawPct    = (spent / c.budget) * 100;
+                const pct       = Math.min(rawPct, 100);
+                const over      = spent > c.budget ? spent - c.budget : 0;
+                const barColor  = rawPct >= 100 ? '#b02030' : rawPct >= 80 ? '#b8960a' : '#0a6640';
+                const rowBg     = over > 0 ? '#fff5f5' : 'transparent';
+                return (
+                  <div key={c.name} style={{ padding: '12px 0', borderBottom: '1px solid #eee', background: rowBg }}>
+                    {/* Row 1: icon + name + % */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                      <span style={{ fontSize: 18, flexShrink: 0 }}>{c.icon}</span>
+                      <span style={{ fontSize: 14, fontWeight: 600, flex: 1 }}>{c.name}</span>
+                      <span style={{ fontSize: 12, fontWeight: 700, color: barColor }}>{Math.round(rawPct)}%</span>
+                      {over > 0 && <span style={{ fontSize: 11, fontWeight: 700, color: '#b02030', background: '#ffe0e0', padding: '2px 6px', borderRadius: 4 }}>Excedido +{fmt(over)}</span>}
+                    </div>
+                    {/* Row 2: bar */}
+                    <div style={{ height: 8, background: '#eee', borderRadius: 4, overflow: 'hidden', marginBottom: 6 }}>
+                      <div style={{ height: '100%', width: `${pct}%`, background: barColor, borderRadius: 4 }} />
+                    </div>
+                    {/* Row 3: límite · gastado · disponible */}
+                    <div style={{ display: 'flex', gap: 16, fontSize: 12, color: '#666' }}>
+                      <span>Límite: <strong style={{ color: '#111' }}>{fmt(c.budget)}</strong></span>
+                      <span>Gastado: <strong style={{ color: '#b02030' }}>{fmt(spent)}</strong></span>
+                      <span>Disponible: <strong style={{ color: avail >= 0 ? '#0a6640' : '#b02030' }}>{fmt(Math.abs(avail))}</strong></span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </>
+        )}
+
+        {/* 3. Categorías sin presupuesto */}
+        {unbudgeted.length > 0 && (
+          <>
+            <h2 style={h2}>Sin Presupuesto Asignado</h2>
+            <div>
+              {unbudgeted.map(c => {
+                const spent = spendingMap[c.name] || 0;
+                return (
+                  <div key={c.name} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 0', borderBottom: '1px solid #eee' }}>
+                    <span style={{ fontSize: 17, flexShrink: 0 }}>{c.icon}</span>
+                    <span style={{ fontSize: 13, flex: 1 }}>{c.name}</span>
+                    <span style={{ fontSize: 13, fontWeight: spent > 0 ? 700 : 400, color: spent > 0 ? '#b02030' : '#aaa' }}>
+                      {spent > 0 ? fmt(spent) : '—'}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </>
+        )}
+
+        <div style={{ marginTop: 40, paddingTop: 16, borderTop: '1px solid #e0e0e0', fontSize: 11, color: '#aaa', textAlign: 'center' }}>
+          My Wallet — Reporte de Presupuesto generado el {todayStr} para {currentUser?.name}
+        </div>
+      </div>
+    </div>
+  );
+
+  return createPortal(content, document.body);
+}
+
 export default function Report() {
-  const { transactions, categories } = useApp();
-  const [showFull, setShowFull]       = useState(false);
+  const { transactions, categories, currentUser } = useApp();
+  const [showFull, setShowFull]         = useState(false);
+  const [showBudget, setShowBudget]     = useState(false);
   const [period, setPeriod]           = useState('this_month');
   const [customFrom, setCustomFrom]   = useState('');
   const [customTo, setCustomTo]       = useState('');
@@ -473,6 +615,12 @@ export default function Report() {
         <h2 style={{ fontSize: 16, fontWeight: 700 }}>Informe — {label}</h2>
         <div style={{ display: 'flex', gap: 8 }}>
           <button style={btnStyle} onClick={exportCSV}>📥 CSV</button>
+          <button
+            onClick={() => setShowBudget(true)}
+            style={{ ...btnStyle, background: '#0a6640', color: '#fff', border: 'none', fontWeight: 700 }}
+          >
+            💰 Reporte Presupuesto
+          </button>
           <button
             onClick={() => setShowFull(true)}
             style={{ ...btnStyle, background: 'var(--accent)', color: '#fff', border: 'none', fontWeight: 700 }}
@@ -619,6 +767,16 @@ export default function Report() {
           onClose={() => setShowFull(false)}
           data={{ label, income, expense, balance, incomeBreakdown, catBreakdown,
                   monthTxs: periodTxs, categories, prevIncome, prevExpense, prevLabel }}
+        />
+      )}
+
+      {showBudget && (
+        <BudgetReport
+          onClose={() => setShowBudget(false)}
+          label={label}
+          periodTxs={periodTxs}
+          categories={categories}
+          currentUser={currentUser}
         />
       )}
     </div>
