@@ -145,7 +145,7 @@ export default function CategoryModal({ initial, onSave, onClose }) {
                   cursor: 'pointer', transition: 'all 0.15s',
                 }}
               >
-                {t === 'income' ? '💚 Ingreso' : '🔴 Gasto'}
+                {t === 'income' ? 'Ingreso' : 'Gasto'}
               </button>
             ))}
           </div>
