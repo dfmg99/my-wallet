@@ -63,7 +63,8 @@ export default function LoginPage() {
 function AuthForm({ loginWithEmail, register }) {
   const [mode, setMode]         = useState('login');
   const [name, setName]         = useState('');
-  const [email, setEmail]       = useState('');
+  const [email, setEmail]       = useState(() => localStorage.getItem('mywallet_email') || '');
+  const [remember, setRemember] = useState(true);
   const [password, setPassword] = useState('');
   const [showPass, setShowPass] = useState(false);
   const [error, setError]       = useState('');
@@ -91,6 +92,8 @@ function AuthForm({ loginWithEmail, register }) {
     try {
       if (mode === 'login') {
         await loginWithEmail(email.trim(), password);
+        if (remember) localStorage.setItem('mywallet_email', email.trim());
+        else localStorage.removeItem('mywallet_email');
       } else if (mode === 'register') {
         await register(name.trim(), email.trim(), password);
         setSuccess('Cuenta creada. Revisa tu correo para confirmarla si es necesario.');
@@ -144,19 +147,26 @@ function AuthForm({ loginWithEmail, register }) {
 
           <div>
             <Label>Correo electrónico</Label>
-            <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="correo@ejemplo.com" autoFocus={mode !== 'register'} style={inp} onFocus={focusAccent} onBlur={blurBorder} />
+            <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="correo@ejemplo.com" autoComplete="email" autoFocus={mode !== 'register' && !email} style={inp} onFocus={focusAccent} onBlur={blurBorder} />
           </div>
 
           {mode !== 'forgot' && (
             <div>
               <Label>Contraseña {mode === 'register' && <span style={{ color: 'var(--border)' }}>(mín. 6 caracteres)</span>}</Label>
               <div style={{ position: 'relative' }}>
-                <input type={showPass ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" style={{ ...inp, paddingRight: 44 }} onFocus={focusAccent} onBlur={blurBorder} />
+                <input type={showPass ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" autoComplete={mode === 'login' ? 'current-password' : 'new-password'} autoFocus={mode === 'login' && !!email} style={{ ...inp, paddingRight: 44 }} onFocus={focusAccent} onBlur={blurBorder} />
                 <button type="button" onClick={() => setShowPass(s => !s)} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--muted)', lineHeight: 1, padding: 2 }}>
                   {showPass ? <EyeOff size={17} /> : <Eye size={17} />}
                 </button>
               </div>
             </div>
+          )}
+
+          {mode === 'login' && (
+            <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--muted)', cursor: 'pointer' }}>
+              <input type="checkbox" checked={remember} onChange={e => setRemember(e.target.checked)} style={{ accentColor: 'var(--accent)', width: 16, height: 16 }} />
+              Recordar usuario
+            </label>
           )}
 
           <ErrorBox msg={error} />
